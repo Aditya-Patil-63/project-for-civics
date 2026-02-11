@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Issues | Civic Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin-dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-content {
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #1e293b;
+            font-size: 1.8rem;
+        }
+
+        .controls-bar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+            min-width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-select {
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 0.95rem;
+            color: #1e293b;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+        .data-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-badge.submitted {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.assigned {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .status-badge.in-progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.closed {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .category-badge i {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .cat-road i {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .cat-sanitation i {
+            background: #fae8ff;
+            color: #86198f;
+        }
+
+        .cat-water i {
+            background: #ecfeff;
+            color: #164e63;
+        }
+
+        .cat-electricity i {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .action-select {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-select:hover {
+            border-color: #cbd5e1;
+        }
+
+        .action-select:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(150%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border-left: 4px solid #10b981;
+        }
+
+        /* View All Toggle */
+        .view-all-container {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 0 0 12px 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .view-all-btn {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .view-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .view-all-btn i {
+            transition: transform 0.3s;
+        }
+
+        .view-all-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .hidden-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .data-table tbody tr.hidden-row {
+            display: none;
+        }
+
+        .data-table tbody tr.hidden-row.show {
+            display: table-row;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .toast i {
+            color: #10b981;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <%- include('../partials/admin-sidebar') %>
+
+            <div class="admin-content">
+                <div class="page-header">
+                    <h1>Issue Management</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="location.reload()"><i class="fas fa-sync-alt"></i>
+                            Refresh</button>
+                    </div>
+                </div>
+
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput"
+                            placeholder="Search issues by description, location, or ID..." onkeyup="filterIssues()">
+                    </div>
+
+                    <select id="statusFilter" class="filter-select" onchange="filterIssues()">
+                        <option value="">All Statuses</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+
+                    <select id="categoryFilter" class="filter-select" onchange="filterIssues()">
+                        <option value="">All Categories</option>
+                        <option value="Road">Road</option>
+                        <option value="Sanitation">Sanitation</option>
+                        <option value="Water">Water</option>
+                        <option value="Electricity">Electricity</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table" id="issuesTable">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% const INITIAL_SHOW=9; %>
+                                <% issues.forEach((issue, index)=> { %>
+                                    <% const isHidden=index>= INITIAL_SHOW; %>
+                                        <tr data-status="<%= issue.status %>" data-category="<%= issue.category %>"
+                                            class="<%= isHidden ? 'hidden-row' : '' %>">
+                                            <td>
+                                                <div class="category-badge cat-<%= issue.category.toLowerCase() %>">
+                                                    <i class="fas fa-<%= 
+                                            issue.category === 'Road' ? 'road' : 
+                                            issue.category === 'Sanitation' ? 'trash' : 
+                                            issue.category === 'Water' ? 'water' : 
+                                            issue.category === 'Electricity' ? 'bolt' : 'circle' 
+                                        %>"></i>
+                                                    <%= issue.category %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                                    title="<%= issue.description %>">
+                                                    <%= issue.description %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-marker-alt text-danger"></i>
+                                                <%= issue.location.coordinates[1].toFixed(4) %>, <%=
+                                                        issue.location.coordinates[0].toFixed(4) %>
+                                            </td>
+                                            <td>
+                                                <%= new Date(issue.createdAt).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="status-badge <%= issue.status.toLowerCase().replace(' ', '-') %>"
+                                                    id="status-badge-<%= issue._id %>">
+                                                    <%= issue.status %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    style="font-weight: 600; color: <%= issue.severity === 'High' ? '#ef4444' : issue.severity === 'Medium' ? '#f59e0b' : '#10b981' %>">
+                                                    <%= issue.severity %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary"
+                                                    onclick="openAssignModal('<%= issue._id %>', '<%= issue.description.substring(0, 30) %>')">
+                                                    <i class="fas fa-user-plus"></i> Assign to Worker
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                        </tbody>
+                    </table>
+                    <% if(issues.length===0) { %>
+                        <div style="text-align: center; padding: 3rem; color: #64748b;">
+                            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No issues found.</p>
+                        </div>
+                        <% } %>
+                            <% if(issues.length> INITIAL_SHOW) { %>
+                                <div class="view-all-container">
+                                    <button id="view-all-btn" class="view-all-btn" onclick="toggleViewAll()">
+                                        <span id="view-all-text">View All</span>
+                                        <span id="hidden-count" class="hidden-count">+<%= issues.length - INITIAL_SHOW
+                                                %> more</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <% } %>
+                </div>
+            </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Status updated successfully</span>
+    </div>
+
+    <!-- Assign to Worker Modal -->
+    <div id="assignWorkerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Issue to Worker</h2>
+                <span class="close-btn" onclick="closeModal('assignWorkerModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Issue</label>
+                <input type="text" id="assign-issue-desc" class="form-control" readonly>
+                <input type="hidden" id="assign-issue-id">
+            </div>
+            <div class="form-group">
+                <label>Select Worker</label>
+                <select id="worker-select" class="form-control"
+                    style="background-color: var(--bg-primary); color: var(--text-primary);">
+                    <option value="Ramesh Gupta">Ramesh Gupta (Field Supervisor)</option>
+                    <option value="Suresh Patil">Suresh Patil (Technician)</option>
+                    <option value="Mahesh Kumar">Mahesh Kumar (Cleaner)</option>
+                    <option value="Deepak Singh">Deepak Singh (Plumber)</option>
+                    <option value="Vijay Verma">Vijay Verma (Electrician)</option>
+                    <option value="Anil Yadav">Anil Yadav (Driver)</option>
+                    <option value="Rajendra Prasad">Rajendra Prasad (Mason)</option>
+                    <option value="Prakash Sharma">Prakash Sharma (Pipe Fitter)</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('assignWorkerModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="assignToWorker()">Assign</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Filter Function
+        function filterIssues() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const rows = document.querySelectorAll('#issuesTable tbody tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const rowStatus = row.getAttribute('data-status');
+                const rowCategory = row.getAttribute('data-category');
+
+                const matchesSearch = text.includes(input);
+                const matchesStatus = !status || rowStatus === status;
+                const matchesCategory = !category || rowCategory === category;
+
+                if (matchesSearch && matchesStatus && matchesCategory) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Open Assign Modal
+        function openAssignModal(issueId, issueDesc) {
+            document.getElementById('assign-issue-id').value = issueId;
+            document.getElementById('assign-issue-desc').value = issueDesc + '...';
+            openModal('assignWorkerModal');
+        }
+
+        // Assign to Worker
+        async function assignToWorker() {
+            const issueId = document.getElementById('assign-issue-id').value;
+            const workerName = document.getElementById('worker-select').value;
+
+            try {
+                const res = await fetch(`/admin/api/issues/${issueId}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'Assigned' })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Update UI locally
+                    const badge = document.getElementById(`status-badge-${issueId}`);
+                    if (badge) {
+                        badge.className = 'status-badge assigned';
+                        badge.textContent = 'Assigned';
+
+                        const row = badge.closest('tr');
+                        if (row) row.setAttribute('data-status', 'Assigned');
+                    }
+
+                    closeModal('assignWorkerModal');
+                    showToast(`Issue assigned to ${workerName}. Worker will now handle status updates.`);
+                } else {
+                    alert('Error assigning issue');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Server Error');
+            }
+        }
+
+        // Toast Helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMessage');
+            msg.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // View All Toggle
+        function toggleViewAll() {
+            const hiddenRows = document.querySelectorAll('.data-table tbody tr.hidden-row');
+            const viewAllBtn = document.getElementById('view-all-btn');
+            const viewAllText = document.getElementById('view-all-text');
+            const hiddenCount = document.getElementById('hidden-count');
+            const isExpanded = viewAllBtn.classList.contains('expanded');
+
+            if (isExpanded) {
+                hiddenRows.forEach(row => {
+                    row.classList.remove('show');
+                });
+                viewAllBtn.classList.remove('expanded');
+                viewAllText.textContent = 'View All';
+                hiddenCount.style.display = 'inline';
+            } else {
+                hiddenRows.forEach((row, index) => {
+                    setTimeout(() => {
+                        row.classList.add('show');
+                    }, index * 50);
+                });
+                viewAllBtn.classList.add('expanded');
+                viewAllText.textContent = 'Show Less';
+                hiddenCount.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

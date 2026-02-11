@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> | Civic Connect
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script type="module" src="/js/three/hero-scene.js"></script>
+    <div id="hero-canvas-container"></div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Civic Connect</a>
+        <ul class="nav-links">
+            <% if (typeof user !=='undefined' && user) { %>
+                <% if (user.role==='admin' ) { %>
+                    <li><a href="/admin/dashboard">Dashboard</a></li>
+                    <li><a href="/admin/issues">Issues</a></li>
+                    <li><a href="/admin/departments">Departments</a></li>
+                    <li><a href="/admin/workers">Workers</a></li>
+                    <% } else if (user.role==='worker' ) { %>
+                        <li><a href="/worker/dashboard">Dashboard</a></li>
+                        <li><a href="/worker/tasks">My Tasks</a></li>
+                        <% } else { %>
+                            <li><a href="/">Home</a></li>
+                            <li><a href="/report">Report</a></li>
+                            <li><a href="/track">Track</a></li>
+                            <li><a href="/leaderboard">Leaderboard</a></li>
+                            <% } %>
+                                <!-- Logout for ALL logged-in users -->
+                                <li><a href="/auth/logout" class="btn btn-primary"
+                                        style="padding: 0.5rem 1rem;">Logout</a></li>
+                                <% } else { %>
+                                    <!-- Guest Navigation -->
+                                    <li><a href="/auth/login">Login</a></li>
+                                    <% } %>
+        </ul>
+    </nav>
+    <!-- Page content starts here -->

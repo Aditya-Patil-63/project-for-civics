@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departments | Civic Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin-dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-content {
+            padding: 2rem;
+            background: #f8fafc;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #1e293b;
+            font-size: 1.8rem;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dept-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            border-left: 4px solid #4F46E5;
+        }
+
+        .dept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dept-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dept-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #e0e7ff;
+            color: #4338ca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .dept-header h3 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .dept-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 0.25rem;
+        }
+
+        .dept-info {
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .dept-info p {
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dept-info i {
+            color: #94a3b8;
+            width: 20px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-full {
+            flex: 1;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <%- include('../partials/admin-sidebar') %>
+
+            <div class="admin-content">
+                <div class="page-header">
+                    <div>
+                        <h1>City Departments</h1>
+                        <p style="color: #64748b;">Manage department allocations and resources</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addDeptModal')"><i class="fas fa-plus"></i> Add
+                        Department</button>
+                </div>
+
+                <div class="grid-cards">
+                    <% departments.forEach(dept=> { %>
+                        <div class="dept-card">
+                            <div class="dept-header">
+                                <div class="dept-icon">
+                                    <i class="fas fa-<%= 
+                                    dept.name.includes('Works') ? 'hard-hat' : 
+                                    dept.name.includes('Sanitation') ? 'trash' : 
+                                    dept.name.includes('Water') ? 'water' : 'building' 
+                                %>"></i>
+                                </div>
+                                <h3>
+                                    <%= dept.name %>
+                                </h3>
+                            </div>
+
+                            <div class="dept-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Staff</span>
+                                    <span class="stat-value">
+                                        <%= dept.staff || '-' %>
+                                    </span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Budget</span>
+                                    <span class="stat-value">
+                                        <%= dept.budget || '-' %>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="dept-info">
+                                <p><i class="fas fa-user-tie"></i> <strong>Head:</strong>
+                                    <%= dept.head %>
+                                </p>
+                                <p><i class="fas fa-envelope"></i>
+                                    <%= dept.contact %>
+                                </p>
+                            </div>
+
+                            <div class="card-actions">
+                                <button class="btn btn-sm btn-outline btn-full"
+                                    onclick="editDepartment('<%= dept.id %>', '<%= dept.name %>', '<%= dept.head %>', '<%= dept.contact %>', '<%= dept.staff %>', '<%= dept.budget %>')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-primary btn-full" onclick="viewTasks('<%= dept.name %>')">
+                                    <i class="fas fa-tasks"></i> View Tasks
+                                </button>
+                            </div>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+    </div>
+    <!-- Add Department Modal -->
+    <div id="addDeptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Department</h2>
+                <span class="close-btn" onclick="closeModal('addDeptModal')">&times;</span>
+            </div>
+            <form action="/admin/departments/add" method="POST">
+                <div class="form-group">
+                    <label>Department Name</label>
+                    <input type="text" name="name" required class="form-control" placeholder="Enter Department Name">
+                </div>
+                <div class="form-group">
+                    <label>Department Head</label>
+                    <input type="text" name="head" required class="form-control" placeholder="Enter Head Name">
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" name="contact" required class="form-control" placeholder="Enter Contact Email">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Staff Count</label>
+                        <input type="number" name="staff" required class="form-control" placeholder="Enter Staff Count">
+                    </div>
+                    <div class="form-group">
+                        <label>Budget</label>
+                        <input type="text" name="budget" required class="form-control"
+                            placeholder="Enter Budget Amount">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addDeptModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Department Modal -->
+    <div id="editDeptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Department</h2>
+                <span class="close-btn" onclick="closeModal('editDeptModal')">&times;</span>
+            </div>
+            <form id="editDeptForm" action="" method="POST">
+                <div class="form-group">
+                    <label>Department Name</label>
+                    <input type="text" name="name" id="edit-name" required class="form-control"
+                        placeholder="Enter Department Name">
+                </div>
+                <div class="form-group">
+                    <label>Department Head</label>
+                    <input type="text" name="head" id="edit-head" required class="form-control"
+                        placeholder="Enter Head Name">
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" name="contact" id="edit-contact" required class="form-control"
+                        placeholder="Enter Contact Email">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Staff Count</label>
+                        <input type="number" name="staff" id="edit-staff" required class="form-control"
+                            placeholder="Enter Staff Count">
+                    </div>
+                    <div class="form-group">
+                        <label>Budget</label>
+                        <input type="text" name="budget" id="edit-budget" required class="form-control"
+                            placeholder="Enter Budget Amount">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editDeptModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Edit Function
+        function editDepartment(id, name, head, contact, staff, budget) {
+            document.getElementById('editDeptForm').action = `/admin/departments/edit/${id}`;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-head').value = head;
+            document.getElementById('edit-contact').value = contact;
+            document.getElementById('edit-staff').value = staff;
+            document.getElementById('edit-budget').value = budget;
+            openModal('editDeptModal');
+        }
+
+        // View Tasks Function
+        function viewTasks(deptName) {
+            // Mapping department names to categories
+            let category = 'Other';
+            if (deptName.includes('Works')) category = 'Road';
+            else if (deptName.includes('Sanitation')) category = 'Sanitation';
+            else if (deptName.includes('Water')) category = 'Water';
+            else if (deptName.includes('Electricity')) category = 'Electricity';
+
+            window.location.href = `/admin/issues?category=${category}`;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,293 @@
+<%- include('../partials/header') %>
+
+    <div class="history-container">
+        <div class="page-header">
+            <div>
+                <h1>Work History</h1>
+                <p>Your completed and resolved tasks</p>
+            </div>
+            <a href="/worker/dashboard" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+
+        <div class="history-stats">
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <h3>
+                        <%= history.length %>
+                    </h3>
+                    <p>Total Completed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-list" id="historyList">
+            <% if(history.length===0) { %>
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No completed tasks yet.</p>
+                </div>
+                <% } else { %>
+                    <% history.forEach((task, index)=> { %>
+                        <div class="history-card <%= index >= 2 ? 'hidden-item' : '' %>">
+                            <div class="task-icon cat-<%= task.category.toLowerCase() %>">
+                                <i class="fas fa-<%= 
+                            task.category === 'Road' ? 'road' : 
+                            task.category === 'Sanitation' ? 'trash' : 
+                            task.category === 'Water' ? 'water' : 'bolt' 
+                        %>"></i>
+                            </div>
+                            <div class="task-info">
+                                <h4>
+                                    <%= task.category %> Issue
+                                </h4>
+                                <p>
+                                    <%= task.description.substring(0, 60) %>...
+                                </p>
+                                <span class="date"><i class="fas fa-calendar"></i> Completed: <%= new
+                                        Date(task.updatedAt).toLocaleDateString() %></span>
+                            </div>
+                            <span class="status-badge <%= task.status.toLowerCase() %>">
+                                <%= task.status %>
+                            </span>
+                        </div>
+                        <% }) %>
+
+                            <% if(history.length> 2) { %>
+                                <div class="view-all-container" id="viewAllContainer">
+                                    <button class="btn-view-all" id="viewAllBtn" onclick="toggleViewAll()">
+                                        <i class="fas fa-chevron-down"></i> View All (<%= history.length %> items)
+                                    </button>
+                                </div>
+                                <% } %>
+                                    <% } %>
+        </div>
+    </div>
+
+    <script>
+        let viewAllExpanded = false;
+
+        function toggleViewAll() {
+            viewAllExpanded = !viewAllExpanded;
+            const hiddenItems = document.querySelectorAll('.history-card.hidden-item');
+            const viewAllBtn = document.getElementById('viewAllBtn');
+
+            if (viewAllExpanded) {
+                hiddenItems.forEach(item => item.classList.add('show'));
+                viewAllBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less';
+            } else {
+                hiddenItems.forEach(item => item.classList.remove('show'));
+                viewAllBtn.innerHTML = '<i class="fas fa-chevron-down"></i> View All (<%= history.length %> items)';
+            }
+        }
+    </script>
+
+    <style>
+        .history-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            margin: 0.5rem 0 0 0;
+            color: #94a3b8;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .history-stats {
+            margin-bottom: 2rem;
+        }
+
+        .history-stats .stat-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .history-stats .stat-card i {
+            font-size: 2rem;
+            color: #10b981;
+        }
+
+        .history-stats .stat-card h3 {
+            margin: 0;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .history-stats .stat-card p {
+            margin: 0;
+            color: #94a3b8;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Hidden items (shown only when View All is clicked) */
+        .history-card.hidden-item {
+            display: none;
+        }
+
+        .history-card.hidden-item.show {
+            display: flex;
+        }
+
+        .view-all-container {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .btn-view-all {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-view-all:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .history-card:hover {
+            transform: translateX(5px);
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .task-icon.cat-road {
+            background: rgba(67, 56, 202, 0.2);
+            color: #818cf8;
+        }
+
+        .task-icon.cat-sanitation {
+            background: rgba(134, 25, 143, 0.2);
+            color: #c084fc;
+        }
+
+        .task-icon.cat-water {
+            background: rgba(22, 78, 99, 0.2);
+            color: #22d3ee;
+        }
+
+        .task-icon.cat-electricity {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-info h4 {
+            margin: 0;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .task-info p {
+            margin: 0.25rem 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .task-info .date {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .status-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-badge.resolved {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .status-badge.closed {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+
+    <%- include('../partials/footer') %>

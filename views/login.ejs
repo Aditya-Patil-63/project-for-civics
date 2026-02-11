@@ -1,0 +1,61 @@
+<%- include('partials/header') %>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Welcome Back</h2>
+                <p>Login to continue making a difference</p>
+            </div>
+
+            <% if(typeof error !=='undefined' ) { %>
+                <div class="alert alert-danger"
+                    style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <form action="/auth/login" method="POST">
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" name="email" id="email" class="form-control"
+                                placeholder="name@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password"><i class="fas fa-lock"></i> Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" id="password" class="form-control"
+                                    placeholder="••••••••" required>
+                                <i class="far fa-eye" id="togglePassword"
+                                    style="cursor: pointer; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Login <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                        </button>
+                    </form>
+
+                    <script src="/js/login.js"></script>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="/auth/register">Create Account</a></p>
+                    </div>
+
+                    <div class="demo-credentials">
+                        <strong><i class="fas fa-info-circle"></i> Login Note</strong>
+                        <div style="display: grid; gap: 5px; margin-top: 5px;">
+                            <div><i class="fas fa-user-shield"></i> <strong>Admin:</strong> Use email with suffix <code
+                                    style="background: #e0e7ff; padding: 2px 6px; border-radius: 4px;">.ac@city.gov.in</code>
+                            </div>
+                            <div><i class="fas fa-hard-hat"></i> <strong>Worker:</strong> Use email with suffix <code
+                                    style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">@city.gov.in</code>
+                            </div>
+                            <div><i class="fas fa-user"></i> <strong>Citizen:</strong> Use email with suffix <code
+                                    style="background: #dcfce7; padding: 2px 6px; border-radius: 4px;">@gmail.com</code>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </div>
+    <%- include('partials/footer') %>

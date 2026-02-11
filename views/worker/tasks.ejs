@@ -1,0 +1,729 @@
+<%- include('../partials/header') %>
+
+    <div class="worker-dashboard-container">
+        <div class="page-header">
+            <div class="header-content">
+                <a href="/worker/dashboard" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <h2>My Assigned Tasks</h2>
+                <p>Manage and update your ongoing fieldwork</p>
+            </div>
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="Assigned">Pending</button>
+                <button class="filter-btn" data-filter="In Progress">In Progress</button>
+                <button class="filter-btn" data-filter="Resolved">Completed</button>
+            </div>
+        </div>
+
+        <div class="tasks-grid" id="tasksGrid">
+            <% if(tasks.length===0) { %>
+                <div class="no-tasks">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>No tasks assigned to you currently.</p>
+                    <span>Enjoy your break!</span>
+                </div>
+                <% } else { %>
+                    <% tasks.forEach((task, index)=> { %>
+                        <div class="task-card <%= index >= 2 ? 'hidden-task' : '' %>" data-status="<%= task.status %>"
+                            id="task-<%= task._id %>">
+                            <div class="card-header">
+                                <span class="category-badge cat-<%= task.category.toLowerCase() %>">
+                                    <i class="fas fa-<%= 
+                                task.category === 'Road' ? 'road' : 
+                                task.category === 'Sanitation' ? 'trash' : 
+                                task.category === 'Water' ? 'water' : 'bolt' 
+                            %>"></i>
+                                    <%= task.category %>
+                                </span>
+                                <% const severityLabel=task.severity>= 4 ? 'High' : task.severity >= 2 ? 'Medium' :
+                                    'Low'; %>
+                                    <span class="priority-badge p-<%= severityLabel.toLowerCase() %>">
+                                        <%= severityLabel %> Priority
+                                    </span>
+                            </div>
+
+                            <div class="card-body">
+                                <h3>
+                                    <%= task.description %>
+                                </h3>
+
+                                <div class="location-box">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="location-details">
+                                        <span>Location Coordinates:</span>
+                                        <strong>
+                                            <%= task.location.coordinates[1].toFixed(4) %>, <%=
+                                                    task.location.coordinates[0].toFixed(4) %>
+                                        </strong>
+                                    </div>
+                                    <a href="https://www.google.com/maps/search/?api=1&query=<%= task.location.coordinates[1] %>,<%= task.location.coordinates[0] %>"
+                                        target="_blank" class="map-link">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+
+                                <div class="status-timeline">
+                                    <div
+                                        class="status-step <%= ['Assigned', 'In Progress', 'Resolved', 'Closed'].includes(task.status) ? 'active' : '' %>">
+                                        <div class="dot"></div>
+                                        <span>Assigned</span>
+                                    </div>
+                                    <div
+                                        class="status-step <%= ['In Progress', 'Resolved', 'Closed'].includes(task.status) ? 'active' : '' %>">
+                                        <div class="dot"></div>
+                                        <span>In Progress</span>
+                                    </div>
+                                    <div
+                                        class="status-step <%= ['Resolved', 'Closed'].includes(task.status) ? 'active' : '' %>">
+                                        <div class="dot"></div>
+                                        <span>Done</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <% if(task.status==='Assigned' ) { %>
+                                    <button onclick="updateTaskStatus('<%= task._id %>', 'In Progress')"
+                                        class="btn-action btn-start">
+                                        <i class="fas fa-play"></i> Start Work
+                                    </button>
+                                    <% } else if(task.status==='In Progress' ) { %>
+                                        <button onclick="openCompletionModal('<%= task._id %>')"
+                                            class="btn-action btn-complete">
+                                            <i class="fas fa-check-circle"></i> Mark Complete
+                                        </button>
+                                        <% } else { %>
+                                            <button class="btn-action btn-disabled" disabled>
+                                                <i class="fas fa-check-double"></i> Completed
+                                            </button>
+                                            <% } %>
+                                                <a href="/worker/tasks/<%= task._id %>" class="btn-action btn-details">
+                                                    Details <i class="fas fa-arrow-right"></i>
+                                                </a>
+                            </div>
+                        </div>
+                        <% }) %>
+
+                            <% if(tasks.length> 2) { %>
+                                <div class="view-all-container" id="viewAllContainer">
+                                    <button class="btn-view-all" onclick="toggleViewAll()">
+                                        <i class="fas fa-chevron-down"></i> View All (<%= tasks.length %> tasks)
+                                    </button>
+                                </div>
+                                <% } %>
+                                    <% } %>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div id="completionModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Complete Task</h3>
+            <p>Please upload a photo of the resolved issue.</p>
+            <form id="completionForm" action="" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="status" value="Resolved">
+                <div class="file-upload-area" onclick="document.getElementById('photoInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload photo</p>
+                    <input type="file" name="after_photo" id="photoInput" accept="image/*" required hidden
+                        onchange="previewImage(this)">
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Submit & Complete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .worker-dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-content h2 {
+            color: white;
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .header-content p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0.5rem 0 0;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: #60a5fa;
+        }
+
+        /* Hidden tasks (shown only when View All is clicked) */
+        .task-card.hidden-task {
+            display: none !important;
+        }
+
+        .task-card.hidden-task.show {
+            display: flex !important;
+        }
+
+        .view-all-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .btn-view-all {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-view-all:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .task-filters {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.05);
+            /* Glass Background */
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .category-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .cat-road {
+            background: rgba(67, 56, 202, 0.2);
+            color: #a5b4fc;
+        }
+
+        .cat-sanitation {
+            background: rgba(134, 25, 143, 0.2);
+            color: #f0abfc;
+        }
+
+        .cat-water {
+            background: rgba(22, 78, 99, 0.2);
+            color: #67e8f9;
+        }
+
+        .priority-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .p-high {
+            color: #f87171;
+        }
+
+        .p-medium {
+            color: #fbbf24;
+        }
+
+        .p-low {
+            color: #34d399;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            flex: 1;
+        }
+
+        .card-body h3 {
+            color: white;
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .location-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .location-box i {
+            color: #f87171;
+        }
+
+        .location-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .location-details span {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .location-details strong {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .map-link {
+            color: #38bdf8;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .map-link:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .status-timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .status-step {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .status-step.active {
+            opacity: 1;
+        }
+
+        .status-step .dot {
+            width: 12px;
+            height: 12px;
+            background: #1e293b;
+            border: 2px solid #64748b;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .status-step.active .dot {
+            background: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-step span {
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .card-footer {
+            padding: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-start {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #2563eb;
+        }
+
+        .btn-complete {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #059669;
+        }
+
+        .btn-details {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-details:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-content h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .modal-content p {
+            color: #94a3b8;
+        }
+
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            margin: 1.5rem 0;
+            transition: all 0.2s;
+        }
+
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .file-upload-area i {
+            font-size: 2rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-area p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            color: white;
+            border-color: white;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .no-tasks {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 4rem;
+            color: white;
+        }
+
+        .no-tasks i {
+            font-size: 4rem;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+    </style>
+
+    <script>
+        // Status Update AJAX
+        async function updateTaskStatus(id, newStatus) {
+            if (!confirm(`Are you sure you want to change status to "${newStatus}"?`)) return;
+
+            try {
+                const res = await fetch(`/api/worker/tasks/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    location.reload(); // Reload to refresh UI state logic
+                } else {
+                    alert('Error updating status');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Server Error');
+            }
+        }
+
+        // Modal Logic
+        function openCompletionModal(id) {
+            const modal = document.getElementById('completionModal');
+            const form = document.getElementById('completionForm');
+            form.action = `/api/worker/tasks/${id}/complete`;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('completionModal').classList.remove('active');
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // View All toggle
+        let viewAllExpanded = false;
+
+        // Filter Logic
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Add to clicked
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+                const tasks = document.querySelectorAll('.task-card');
+                const viewAllContainer = document.getElementById('viewAllContainer');
+                const viewAllBtn = document.querySelector('.btn-view-all');
+
+                // Count matching tasks and show only first 2
+                let matchCount = 0;
+                let totalMatching = 0;
+
+                // First pass: count total matching
+                tasks.forEach(task => {
+                    if (filter === 'all' || task.dataset.status === filter) {
+                        totalMatching++;
+                    }
+                });
+
+                // Second pass: show/hide based on count
+                matchCount = 0;
+                tasks.forEach(task => {
+                    const matches = filter === 'all' || task.dataset.status === filter;
+
+                    if (matches) {
+                        matchCount++;
+                        if (matchCount <= 2 || viewAllExpanded) {
+                            task.classList.add('show');
+                            task.style.display = 'flex';
+                        } else {
+                            task.classList.remove('show');
+                            task.style.display = 'none';
+                        }
+                    } else {
+                        task.classList.remove('show');
+                        task.style.display = 'none';
+                    }
+                });
+
+                // Show/hide View All button based on if there are more than 2 matching tasks
+                if (viewAllContainer && viewAllBtn) {
+                    if (totalMatching > 2) {
+                        viewAllContainer.style.display = 'block';
+                        if (viewAllExpanded) {
+                            viewAllBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less';
+                        } else {
+                            viewAllBtn.innerHTML = '<i class="fas fa-chevron-down"></i> View All (' + totalMatching + ' tasks)';
+                        }
+                    } else {
+                        viewAllContainer.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Update toggleViewAll to re-apply current filter
+        function toggleViewAll() {
+            viewAllExpanded = !viewAllExpanded;
+            // Trigger click on current active filter to re-apply logic
+            const activeFilter = document.querySelector('.filter-btn.active');
+            if (activeFilter) {
+                activeFilter.click();
+            }
+        }
+    </script>
+
+    <%- include('../partials/footer') %>
