@@ -33,6 +33,7 @@
     "mongoose": "^9.1.6",
     "multer": "^2.0.2",
     "mysql2": "^3.16.3",
+    "playwright": "^1.62.1",
     "socket.io": "^4.8.3"
   }
 }

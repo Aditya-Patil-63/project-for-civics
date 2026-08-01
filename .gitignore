@@ -1,6 +1,8 @@
 
 node_modules/
 .env
+.env.*
+qa_evidence/
 public/uploads/*
 !public/uploads/.gitkeep
 .DS_Store
