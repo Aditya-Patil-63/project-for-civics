@@ -1,0 +1,511 @@
+<%- include('../partials/header') %>
+
+    <div class="overlay-bg"></div>
+
+    <div class="container main-wrapper">
+        <div class="leaderboard-container">
+
+            <div class="header-section animate-up">
+                <h2><i class="fas fa-trophy text-warning"></i> Community Champions</h2>
+                <p>Top citizens making a difference in our city.</p>
+            </div>
+
+            <!-- 3D Trophy Room -->
+            <!-- 3D Trophy Room Removed -->
+
+            <!-- Top 3 Podium (Hidden CSS version if we want pure 3D, but let's keep it mixed for data display below) -->
+            <% if (users.length === 0) { %>
+                <div class="empty-state text-center animate-up delay-1" style="padding: 3rem; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; margin-top: 2rem;">
+                    <i class="fas fa-medal text-warning" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                    <h3 style="color: white; margin-bottom: 0.5rem;">No citizens on the leaderboard yet!</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8);">Be the first to report an issue and earn points.</p>
+                </div>
+            <% } else { %>
+                <div class="podium-section animate-up delay-1">
+                    <% if(users.length>= 2) { %>
+                        <div class="podium-place second">
+                            <div class="avatar">
+                                <%= users[1].name.charAt(0) %>
+                            </div>
+                            <div class="rank-badge">2</div>
+                            <div class="name">
+                                <%= users[1].name %>
+                            </div>
+                            <div class="points">
+                                <%= users[1].points %> pts
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <% if(users.length>= 1) { %>
+                        <div class="podium-place first">
+                            <div class="crown"><i class="fas fa-crown"></i></div>
+                            <div class="avatar">
+                                <%= users[0].name.charAt(0) %>
+                            </div>
+                            <div class="rank-badge">1</div>
+                            <div class="name">
+                                <%= users[0].name %>
+                            </div>
+                            <div class="points">
+                                <%= users[0].points %> pts
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <% if(users.length>= 3) { %>
+                        <div class="podium-place third">
+                            <div class="avatar">
+                                <%= users[2].name.charAt(0) %>
+                            </div>
+                            <div class="rank-badge">3</div>
+                            <div class="name">
+                                <%= users[2].name %>
+                            </div>
+                            <div class="points">
+                                <%= users[2].points %> pts
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- List View -->
+                <div class="list-section animate-up delay-2">
+                    <% const INITIAL_SHOW=3; %>
+                    <% const remainingUsers=users.slice(3); %>
+                    <% remainingUsers.forEach((user, index)=> { %>
+                        <% const isCurrentUser=currentUserName && user.name===currentUserName; %>
+                        <% const isHidden=index>= INITIAL_SHOW; %>
+                        <div
+                            class="list-item <%= isHidden ? 'hidden-item' : '' %> <%= isCurrentUser ? 'current-user' : '' %>">
+                            <div class="rank">
+                                <%= index + 4 %>
+                            </div>
+                            <div class="user-info">
+                                <div class="avatar-small <%= isCurrentUser ? 'current-user-avatar' : '' %>">
+                                    <%= user.name.charAt(0) %>
+                                </div>
+                                <div class="name">
+                                    <%= user.name %>
+                                    <% if(isCurrentUser) { %>
+                                        <span class="you-badge">You</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="badges">
+                                <% user.badges.forEach(badge=> { %>
+                                    <span class="badge-icon" title="<%= badge %>"><i
+                                            class="fas fa-medal"></i></span>
+                                <% }) %>
+                            </div>
+                            <div class="points">
+                                <%= user.points %> pts
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <!-- View All Toggle -->
+                <% if(remainingUsers.length> INITIAL_SHOW) { %>
+                    <div class="view-all-container animate-up delay-2">
+                        <button id="view-all-btn" class="view-all-btn" onclick="toggleViewAll()">
+                            <span id="view-all-text">View All</span>
+                            <span id="hidden-count" class="hidden-count">+<%= remainingUsers.length - INITIAL_SHOW %>
+                                    more</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                <% } %>
+            <% } %>
+
+        </div>
+    </div>
+
+    <style>
+        /* Reuse global background */
+
+
+        .leaderboard-container {
+            max-width: 800px;
+            margin: 0 auto;
+            color: white;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header-section h2 {
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-section p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .text-warning {
+            color: #fbbf24;
+        }
+
+        /* Podium */
+        .podium-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 3rem;
+            height: 300px;
+        }
+
+        .podium-place {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            max-width: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .first {
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 215, 0, 0.2), rgba(255, 255, 255, 0.1));
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .second {
+            height: 85%;
+            background: linear-gradient(to bottom, rgba(192, 192, 192, 0.2), rgba(255, 255, 255, 0.1));
+            border-color: rgba(192, 192, 192, 0.5);
+        }
+
+        .third {
+            height: 70%;
+            background: linear-gradient(to bottom, rgba(205, 127, 50, 0.2), rgba(255, 255, 255, 0.1));
+            border-color: rgba(205, 127, 50, 0.5);
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+            margin: 0 auto 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .crown {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #fbbf24;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .name {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .points {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 60px;
+            /* Adjust based on visuals */
+            right: 20px;
+            /* Rough positioning */
+            background: #1f2937;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dynamic adjustments for different heights */
+        .second .avatar,
+        .second .name,
+        .second .points {
+            margin-bottom: auto;
+            margin-top: 10px;
+        }
+
+        .first .avatar,
+        .first .name,
+        .first .points {
+            margin-bottom: auto;
+            margin-top: 20px;
+        }
+
+        .third .avatar,
+        .third .name,
+        .third .points {
+            margin-bottom: auto;
+            margin-top: 10px;
+        }
+
+        /* List */
+        .list-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s;
+            border-radius: 10px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+
+        .list-item .rank {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+            width: 40px;
+        }
+
+        .list-item .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .list-item .name {
+            color: white;
+            margin: 0;
+        }
+
+        .avatar-small {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .list-item .points {
+            font-weight: 700;
+            color: #bdc5fc;
+        }
+
+        .badges {
+            display: flex;
+            gap: 5px;
+            margin-right: 20px;
+        }
+
+        .badge-icon {
+            color: #fbbf24;
+            font-size: 1.1rem;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% {
+                transform: translate(-50%, 0px);
+            }
+
+            50% {
+                transform: translate(-50%, -10px);
+            }
+
+            100% {
+                transform: translate(-50%, 0px);
+            }
+        }
+
+        .animate-up {
+            animation: fadeInUp 0.6s forwards;
+            opacity: 0;
+        }
+
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .podium-section {
+                align-items: flex-end;
+            }
+
+            .name {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* View All Toggle */
+        .view-all-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .view-all-btn {
+            background: rgba(79, 70, 229, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 70, 229, 0.4);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-all-btn:hover {
+            background: rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .view-all-btn i {
+            transition: transform 0.3s;
+        }
+
+        .view-all-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .hidden-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Hidden Items */
+        .list-item.hidden-item {
+            display: none;
+        }
+
+        .list-item.hidden-item.show {
+            display: flex;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        /* Current User Highlighting */
+        .list-item.current-user {
+            background: rgba(79, 70, 229, 0.15);
+            border: 1px solid rgba(79, 70, 229, 0.4);
+            border-radius: 12px;
+        }
+
+        .current-user-avatar {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+        }
+
+        .you-badge {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+
+    <!-- View All Toggle Script -->
+    <script>
+        function toggleViewAll() {
+            const hiddenItems = document.querySelectorAll('.list-item.hidden-item');
+            const viewAllBtn = document.getElementById('view-all-btn');
+            const viewAllText = document.getElementById('view-all-text');
+            const hiddenCount = document.getElementById('hidden-count');
+            const isExpanded = viewAllBtn.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Collapse - hide extra items
+                hiddenItems.forEach(item => {
+                    item.classList.remove('show');
+                });
+                viewAllBtn.classList.remove('expanded');
+                viewAllText.textContent = 'View All';
+                hiddenCount.style.display = 'inline';
+            } else {
+                // Expand - show all items
+                hiddenItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('show');
+                    }, index * 80); // Staggered animation
+                });
+                viewAllBtn.classList.add('expanded');
+                viewAllText.textContent = 'Show Less';
+                hiddenCount.style.display = 'none';
+            }
+        }
+    </script>
+
+    <!-- 3D Scripts Removed -->
+    <%- include('../partials/footer') %>

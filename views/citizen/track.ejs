@@ -1,0 +1,599 @@
+<%- include('../partials/header') %>
+
+    <div class="overlay-bg"></div>
+
+    <div class="container main-wrapper">
+        <div class="track-container">
+            <!-- 3D Map View Removed -->
+
+            <!-- Script removed -->
+
+            <!-- Header & Stats -->
+            <div class="track-header animate-up">
+                <h2><i class="fas fa-stream"></i> Issue Tracker</h2>
+                <p>Monitor the status of community reports in real-time.</p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs animate-up delay-1">
+                <button class="tab-btn active" onclick="filterIssues('All')">All Reports</button>
+                <button class="tab-btn" onclick="filterIssues('Submitted')">Pending</button>
+                <button class="tab-btn" onclick="filterIssues('In Progress')">In Progress</button>
+                <button class="tab-btn" onclick="filterIssues('Resolved')">Resolved</button>
+            </div>
+
+            <!-- Issues Grid -->
+            <div id="issues-grid" class="issues-grid animate-up delay-2">
+                <!-- Loaded via JS -->
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- View All Toggle -->
+            <div id="view-all-container" class="view-all-container" style="display: none;">
+                <button id="view-all-btn" class="view-all-btn" onclick="toggleViewAll()">
+                    <span id="view-all-text">View All</span>
+                    <span id="hidden-count" class="hidden-count"></span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .track-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .track-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .track-header h2 {
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .track-header p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Filters */
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: #4F46E5;
+            border-color: #4F46E5;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Grid */
+        .issues-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Issue Card */
+        .issue-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, opacity 0.3s;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .issue-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .category-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .category-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .date-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: block;
+            margin-top: 2px;
+            font-weight: 400;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-Submitted {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-In-Progress {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        /* Hyphen fix */
+        .status-InProgress {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-Resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .card-body p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Timeline */
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 2rem;
+            padding: 0 10px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .timeline-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: transparent;
+            transition: all 0.3s;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        /* Active State logic */
+        .timeline-step.active .step-circle {
+            background: #4F46E5;
+            border-color: #4F46E5;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+        }
+
+        .timeline-step.active .step-label {
+            color: #4F46E5;
+            font-weight: 700;
+        }
+
+        .timeline-step.completed .step-circle {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        /* Expandable */
+        .expand-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+
+        .expand-btn:hover {
+            color: white;
+        }
+
+        .details-panel {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideDown 0.3s;
+        }
+
+        .photo-gallery {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .photo-gallery img {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-up {
+            animation: fadeIn 0.6s forwards;
+            opacity: 0;
+        }
+
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        /* View All Toggle */
+        .view-all-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .view-all-btn {
+            background: rgba(79, 70, 229, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 70, 229, 0.4);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-all-btn:hover {
+            background: rgba(79, 70, 229, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .view-all-btn i {
+            transition: transform 0.3s;
+        }
+
+        .view-all-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .hidden-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .issue-card.hidden-card {
+            display: none;
+        }
+
+        .issue-card.hidden-card.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+
+    <script>
+        let allIssues = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchIssues();
+        });
+
+        function fetchIssues() {
+
+
+            fetch('/api/issues')
+                .then(res => res.json())
+                .then(data => {
+                    allIssues = data;
+                    renderIssues(data);
+                    if (window.update3DMarkers) window.update3DMarkers(data);
+                })
+                .catch(err => console.error(err));
+        }
+
+        function renderIssues(issues) {
+            const grid = document.getElementById('issues-grid');
+            const viewAllContainer = document.getElementById('view-all-container');
+            const viewAllBtn = document.getElementById('view-all-btn');
+            const viewAllText = document.getElementById('view-all-text');
+            const hiddenCount = document.getElementById('hidden-count');
+
+            grid.innerHTML = '';
+
+            // Reset view all state
+            if (viewAllBtn) {
+                viewAllBtn.classList.remove('expanded');
+                viewAllText.textContent = 'View All';
+            }
+
+            if (issues.length === 0) {
+                grid.innerHTML = `
+                <div style="text-align:center; padding: 4rem; color: white;">
+                    <i class="fas fa-clipboard-check" style="font-size: 4rem; opacity: 0.5; margin-bottom: 1rem;"></i>
+                    <h3>No reports found</h3>
+                    <p>Issues you report will appear here.</p>
+                </div>`;
+                viewAllContainer.style.display = 'none';
+                return;
+            }
+
+            const INITIAL_SHOW = 3; // Number of cards to show initially
+            const hiddenIssuesCount = Math.max(0, issues.length - INITIAL_SHOW);
+
+            issues.forEach((issue, index) => {
+                const date = new Date(issue.createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+
+                let step1 = 'active', step2 = '', step3 = '';
+                if (issue.status === 'In Progress') { step1 = 'completed'; step2 = 'active'; }
+                if (issue.status === 'Resolved') { step1 = 'completed'; step2 = 'completed'; step3 = 'active'; }
+
+                const card = document.createElement('div');
+                card.className = 'issue-card';
+
+                // Hide cards beyond initial show count
+                if (index >= INITIAL_SHOW) {
+                    card.classList.add('hidden-card');
+                }
+
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                // Icon mapping
+                const icons = { 'Road': 'road', 'Water': 'water', 'Electricity': 'bolt', 'Sanitation': 'trash-alt', 'Public Safety': 'shield-alt', 'Other': 'question' };
+                const icon = icons[issue.category] || 'exclamation-circle';
+
+                card.innerHTML = `
+                <div class="card-header">
+                    <div class="category-badge">
+                        <div class="category-icon"><i class="fas fa-${icon}"></i></div>
+                        <div>
+                            ${issue.category}
+                            <span class="date-meta">#${issue._id.substring(issue._id.length - 6)} • ${date}</span>
+                        </div>
+                    </div>
+                    <span class="status-badge status-${issue.status.replace(' ', '')}">${issue.status}</span>
+                </div>
+                
+                <div class="card-body">
+                    <p>${issue.description}</p>
+                    
+                    <div class="timeline">
+                        <div class="timeline-step ${step1}">
+                            <div class="step-circle"><i class="fas fa-check"></i></div>
+                            <div class="step-label">Received</div>
+                        </div>
+                        <div class="timeline-step ${step2}">
+                            <div class="step-circle"><i class="fas fa-tools"></i></div>
+                            <div class="step-label">In Progress</div>
+                        </div>
+                        <div class="timeline-step ${step3}">
+                            <div class="step-circle"><i class="fas fa-check-double"></i></div>
+                            <div class="step-label">Resolved</div>
+                        </div>
+                    </div>
+
+                    <button class="expand-btn" onclick="toggleDetails('${issue._id}')">
+                        View Details <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <div id="details-${issue._id}" class="details-panel">
+                        <div class="photo-gallery">
+                            ${issue.photos.map(p => `<img src="${p}" onclick="window.open(this.src)">`).join('')}
+                            ${issue.photos.length === 0 ? '<span style="font-size:0.9rem; color:#9ca3af; font-style:italic;">No photos uploaded</span>' : ''}
+                        </div>
+                        <div style="margin-top: 1rem; font-size: 0.9rem; color: #6b7280;">
+                            <strong>Severity:</strong> ${issue.severity}/5 <br>
+                            <strong>Location:</strong> ${issue.location.coordinates[1].toFixed(4)}, ${issue.location.coordinates[0].toFixed(4)}
+                        </div>
+                    </div>
+                </div>
+            `;
+                grid.appendChild(card);
+            });
+
+            // Show/hide View All button based on hidden count
+            if (hiddenIssuesCount > 0) {
+                viewAllContainer.style.display = 'block';
+                hiddenCount.textContent = `+${hiddenIssuesCount} more`;
+            } else {
+                viewAllContainer.style.display = 'none';
+            }
+        }
+
+        function toggleDetails(id) {
+            const panel = document.getElementById(`details-${id}`);
+            const btn = panel.previousElementSibling;
+
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                btn.innerHTML = 'View Details <i class="fas fa-chevron-down"></i>';
+            } else {
+                panel.style.display = 'block';
+                btn.innerHTML = 'Hide Details <i class="fas fa-chevron-up"></i>';
+            }
+        }
+
+        function toggleViewAll() {
+            const hiddenCards = document.querySelectorAll('.issue-card.hidden-card');
+            const viewAllBtn = document.getElementById('view-all-btn');
+            const viewAllText = document.getElementById('view-all-text');
+            const hiddenCount = document.getElementById('hidden-count');
+            const isExpanded = viewAllBtn.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Collapse - hide extra cards
+                hiddenCards.forEach(card => {
+                    card.classList.remove('show');
+                });
+                viewAllBtn.classList.remove('expanded');
+                viewAllText.textContent = 'View All';
+                hiddenCount.style.display = 'inline';
+            } else {
+                // Expand - show all cards
+                hiddenCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('show');
+                    }, index * 100); // Staggered animation
+                });
+                viewAllBtn.classList.add('expanded');
+                viewAllText.textContent = 'Show Less';
+                hiddenCount.style.display = 'none';
+            }
+        }
+
+        function filterIssues(status) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (status === 'All') {
+                renderIssues(allIssues);
+            } else {
+                const filtered = allIssues.filter(i => {
+                    if (status === 'In Progress') return i.status === 'In Progress';
+                    if (status === 'Submitted') return i.status === 'Submitted';
+                    if (status === 'Resolved') return i.status === 'Resolved';
+                    return matches;
+                });
+                renderIssues(filtered);
+            }
+        }
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        const socket = io();
+        socket.on('issue_updated', (updatedIssue) => {
+            // Find and replace locally, then re-render if needed
+            // For simplicity, just refetch or manually update DOM
+            // Let's refetch to be safe and easy
+            fetchIssues();
+            if (window.Toast) Toast.show('success', 'Status Update', `Issue #${updatedIssue._id.substring(0, 6)} updated to ${updatedIssue.status}`);
+        });
+
+        socket.on('new_issue', () => fetchIssues());
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- <script src="/js/three/track-scene.js"></script> -->
+    <%- include('../partials/footer') %>

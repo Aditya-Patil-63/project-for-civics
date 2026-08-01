@@ -1,0 +1,72 @@
+<!-- Footer Content -->
+<footer>
+    <div class="footer-content">
+        <!-- About Section -->
+        <div class="footer-section">
+            <h3>Civic Connect</h3>
+            <p>Empowering citizens to build smarter, cleaner, and safer communities through real-time issue reporting
+                and
+                collaborative resolution.</p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <% if (user && user.role==='citizen' ) { %>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="/home"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a href="/report"><i class="fas fa-chevron-right"></i> Report Issue</a></li>
+                    <li><a href="/track"><i class="fas fa-chevron-right"></i> Track Status</a></li>
+                    <li><a href="/leaderboard"><i class="fas fa-chevron-right"></i> Leaderboard</a></li>
+                </ul>
+            </div>
+            <% } %>
+
+                <!-- Contact Info -->
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>123 Civic Plaza, Smart City<br>New Delhi, India 110001</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>+91 1800-123-4567</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>support@civicconnect.in</span>
+                        </li>
+                    </ul>
+                </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 Civic Issue Reporting System. Built for Smart India Hackathon.</p>
+    </div>
+</footer>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+<script>
+    // Initialize Vanilla Tilt on all cards and glass panels
+    VanillaTilt.init(document.querySelectorAll(".card, .glass-panel, .stat-card, .category-card, .issue-card, .podium-place"), {
+        max: 3,
+        speed: 800,
+        glare: true,
+        "max-glare": 0.1,
+        scale: 1.01,
+        perspective: 2000
+    });
+</script>
+<script src="/js/main.js"></script>
+</body>
+
+</html>

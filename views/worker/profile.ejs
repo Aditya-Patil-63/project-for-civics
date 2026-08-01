@@ -1,0 +1,437 @@
+<%- include('../partials/header') %>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-info">
+                <h1>
+                    <%= profile.name %>
+                </h1>
+                <p class="role">
+                    <%= profile.role %> • <%= profile.department %>
+                </p>
+            </div>
+            <button class="btn-edit" onclick="openEditModal()">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+        </div>
+
+        <div class="profile-content">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> Personal Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Full Name</label>
+                        <p id="display-name">
+                            <%= profile.name %>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label>Email</label>
+                        <p>
+                            <%= profile.email %>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone</label>
+                        <p id="display-phone">
+                            <%= profile.phone %>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label>Department</label>
+                        <p>
+                            <%= profile.department %>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label>Role</label>
+                        <p>
+                            <%= profile.role %>
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <label>Joined</label>
+                        <p>
+                            <%= profile.joinedDate %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <h3><i class="fas fa-chart-bar"></i> Performance Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <h4>
+                            <%= profile.tasksCompleted %>
+                        </h4>
+                        <p>Tasks Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-card">
+                <a href="/worker/dashboard" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to
+                    Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Profile</h3>
+                <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm" onsubmit="saveProfile(event)">
+                <div class="form-group">
+                    <label for="edit-name">Full Name</label>
+                    <input type="text" id="edit-name" value="<%= profile.name %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-phone">Phone Number</label>
+                    <input type="tel" id="edit-phone" value="<%= profile.phone %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">Email (Read-only)</label>
+                    <input type="email" id="edit-email" value="<%= profile.email %>" readonly disabled>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal() {
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('edit-name').value;
+            const phone = document.getElementById('edit-phone').value;
+
+            // Update display (in real app, this would be an API call)
+            document.getElementById('display-name').textContent = name;
+            document.getElementById('display-phone').textContent = phone;
+            document.querySelector('.profile-info h1').textContent = name;
+
+            // Show success message
+            alert('Profile updated successfully!');
+            closeEditModal();
+        }
+
+        // Close modal on clicking outside
+        document.getElementById('editModal').addEventListener('click', function (e) {
+            if (e.target === this) closeEditModal();
+        });
+    </script>
+
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar i {
+            font-size: 5rem;
+            color: #3b82f6;
+        }
+
+        .profile-info h1 {
+            margin: 0;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .profile-info .role {
+            color: #94a3b8;
+            margin: 0.5rem 0;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fbbf24;
+        }
+
+        .info-card,
+        .stats-card,
+        .actions-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card h3,
+        .stats-card h3 {
+            color: white;
+            margin: 0 0 1.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item label {
+            display: block;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-item p {
+            margin: 0;
+            color: white;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+        }
+
+        .stat-item h4 {
+            margin: 0;
+            color: #3b82f6;
+            font-size: 2rem;
+        }
+
+        .stat-item p {
+            margin: 0.5rem 0 0 0;
+            color: #94a3b8;
+        }
+
+        .actions-card {
+            text-align: center;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Edit Button */
+        .btn-edit {
+            margin-left: auto;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 450px;
+            padding: 2rem;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #ef4444;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #1e293b !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white !important;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            -webkit-text-fill-color: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: #1e293b !important;
+        }
+
+        .form-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #0f172a !important;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+
+    <%- include('../partials/footer') %>

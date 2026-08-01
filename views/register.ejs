@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Create Account</h2>
+                <p>Join us to make your city better</p>
+            </div>
+
+            <% if(typeof error !=='undefined' ) { %>
+                <div class="alert alert-danger"
+                    style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <form action="/auth/register" method="POST">
+                        <div class="form-group">
+                            <label for="name"><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="John Doe"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" name="email" id="email" class="form-control"
+                                placeholder="name@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password"><i class="fas fa-lock"></i> Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="password" id="password" class="form-control"
+                                    placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm_password"><i class="fas fa-lock"></i> Confirm Password</label>
+                            <div class="password-wrapper">
+                                <input type="password" name="confirm_password" id="confirm_password"
+                                    class="form-control" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Register <i class="fas fa-user-plus" style="margin-left: 8px;"></i>
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Already have an account? <a href="/auth/login">Login here</a></p>
+                    </div>
+        </div>
+    </div>
+    <%- include('partials/footer') %>

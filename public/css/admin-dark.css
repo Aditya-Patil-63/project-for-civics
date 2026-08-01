@@ -1,0 +1,349 @@
+/* Admin Dark Theme */
+
+:root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --accent-color: #6366f1;
+    /* Indigo 500 */
+    --accent-hover: #4f46e5;
+    /* Indigo 600 */
+    --success-bg: #064e3b;
+    --success-text: #34d399;
+    --warning-bg: #451a03;
+    --warning-text: #fbbf24;
+    --danger-bg: #450a0a;
+    --danger-text: #f87171;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.admin-content {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary);
+}
+
+/* Headings and Text */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-primary) !important;
+}
+
+p,
+span,
+div {
+    color: var(--text-primary);
+}
+
+.text-secondary,
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Cards and Containers */
+.stat-card,
+.chart-card,
+.activity-section,
+.controls-bar,
+.data-table-container,
+.dept-card,
+.worker-card {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Header & Sidebar */
+.dashboard-header h1,
+.page-header h1 {
+    color: var(--text-primary) !important;
+}
+
+.date-badge {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color);
+}
+
+/* Icons */
+.stat-icon,
+.activity-icon,
+.dept-icon,
+.avatar {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Tables */
+.data-table th {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.data-table td {
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.data-table tr:hover {
+    background-color: var(--bg-tertiary) !important;
+}
+
+/* Form Elements */
+input,
+select {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+input::placeholder {
+    color: #e2e8f0 !important;
+    /* Lighter color for better visibility */
+    opacity: 0.8 !important;
+    /* Ensure high opacity */
+}
+
+/* Badges - Adjust for Dark Mode contrast */
+.status-badge.submitted {
+    background: rgba(220, 38, 38, 0.2);
+    color: #fca5a5;
+}
+
+.status-badge.assigned {
+    background: rgba(79, 70, 229, 0.2);
+    color: #a5b4fc;
+}
+
+.status-badge.in-progress {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+}
+
+.status-badge.resolved {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+}
+
+.status-badge.closed {
+    background: rgba(71, 85, 105, 0.2);
+    color: #cbd5e1;
+}
+
+.cat-road i {
+    background: rgba(67, 56, 202, 0.3);
+    color: #a5b4fc;
+}
+
+.cat-sanitation i {
+    background: rgba(134, 25, 143, 0.3);
+    color: #f0abfc;
+}
+
+.cat-water i {
+    background: rgba(22, 78, 99, 0.3);
+    color: #67e8f9;
+}
+
+.cat-electricity i {
+    background: rgba(154, 52, 18, 0.3);
+    color: #fdba74;
+}
+
+/* Buttons */
+.btn-outline {
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-outline:hover {
+    background-color: var(--bg-tertiary) !important;
+}
+
+/* Stats */
+.stat-number {
+    color: var(--text-primary) !important;
+}
+
+.stats-info h3 {
+    color: var(--text-secondary) !important;
+}
+
+/* Activity Feed */
+.activity-item {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.activity-content p {
+    color: var(--text-secondary) !important;
+}
+
+.activity-content strong {
+    color: var(--text-primary) !important;
+}
+
+/* Sidebar Specifics */
+.admin-sidebar {
+    background-color: #020617 !important;
+    /* Even darker for sidebar */
+    border-right: 1px solid var(--border-color);
+}
+
+.admin-sidebar a {
+    color: var(--text-secondary) !important;
+}
+
+.admin-sidebar a:hover {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Departments Page Specifics */
+.stat-item {
+    background-color: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-color);
+}
+
+.stat-label {
+    color: var(--text-secondary) !important;
+}
+
+.stat-value {
+    color: var(--text-primary) !important;
+}
+
+/* Ensure button background is not white */
+.btn-outline {
+    background-color: transparent !important;
+}
+
+/* Workers Page Specifics */
+.stat-box .label {
+    color: var(--text-secondary) !important;
+}
+
+.stat-box .value {
+    color: var(--text-primary) !important;
+}
+
+/* Modal Styles for Dark Theme */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    margin: 10% auto;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    width: 50%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.close-btn {
+    color: var(--text-secondary);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus {
+    outline: none;
+    background-color: var(--bg-primary) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Fix for Chrome Autofill white background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+.modal input:-webkit-autofill,
+.modal input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--bg-primary) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure modal inputs stay dark */
+.modal input,
+.modal select,
+.modal .form-control,
+.modal .form-control:focus {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}

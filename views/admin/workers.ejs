@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Workers | Civic Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin-dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-content {
+            padding: 2rem;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #1e293b;
+            font-size: 1.8rem;
+        }
+
+        .worker-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .worker-card:hover {
+            transform: translateX(5px);
+            border-left: 4px solid #4F46E5;
+        }
+
+        .worker-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.25rem;
+            position: relative;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid white;
+        }
+
+        .status-active {
+            background: #10b981;
+        }
+
+        .status-busy {
+            background: #f59e0b;
+        }
+
+        .status-offline {
+            background: #94a3b8;
+        }
+
+        .details h3 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .details p {
+            margin: 0.25rem 0 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .worker-stats {
+            display: flex;
+            gap: 2rem;
+            margin-right: 2rem;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-box .label {
+            display: block;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .stat-box .value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .worker-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* View All Toggle */
+        .view-all-container {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .view-all-btn {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .view-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .view-all-btn i {
+            transition: transform 0.3s;
+        }
+
+        .view-all-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+        .hidden-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+
+        .worker-card.hidden-card {
+            display: none;
+        }
+
+        .worker-card.hidden-card.show {
+            display: flex;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <%- include('../partials/admin-sidebar') %>
+
+            <div class="admin-content">
+                <div class="page-header">
+                    <div>
+                        <h1>Field Workers</h1>
+                        <p style="color: #64748b;">Monitor and assign tasks to ground staff</p>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-user-plus"></i> Add Worker</button>
+                </div>
+
+                <div class="workers-list">
+                    <% const INITIAL_SHOW=6; %>
+                        <% workers.forEach((worker, index)=> { %>
+                            <% const isHidden=index>= INITIAL_SHOW; %>
+                                <div class="worker-card <%= isHidden ? 'hidden-card' : '' %>">
+                                    <div class="worker-info">
+                                        <div class="avatar">
+                                            <%= worker.name.charAt(0) %>
+                                                <span class="status-dot status-<%= worker.status.toLowerCase() %>"
+                                                    title="<%= worker.status %>"></span>
+                                        </div>
+                                        <div class="details">
+                                            <h3>
+                                                <%= worker.name %>
+                                            </h3>
+                                            <p>
+                                                <%= worker.role %> • <%= worker.department %>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="worker-stats">
+                                        <div class="stat-box">
+                                            <span class="label">Status</span>
+                                            <span class="value"
+                                                style="color: <%= worker.status === 'Active' ? '#10b981' : worker.status === 'Busy' ? '#f59e0b' : '#94a3b8' %>">
+                                                <%= worker.status %>
+                                            </span>
+                                        </div>
+                                        <div class="stat-box">
+                                            <span class="label">Tasks</span>
+                                            <span class="value">
+                                                <%= worker.tasks %>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="worker-actions">
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="callWorker('<%= worker.name %>', '<%= worker.phone %>')"><i
+                                                class="fas fa-phone"></i> Call</button>
+                                        <button class="btn btn-sm btn-primary"
+                                            onclick="openAssignModal('<%= worker.name %>')">Assign Task</button>
+                                    </div>
+                                </div>
+                                <% }) %>
+                </div>
+
+                <% if(workers.length> INITIAL_SHOW) { %>
+                    <div class="view-all-container">
+                        <button id="view-all-btn" class="view-all-btn" onclick="toggleViewAll()">
+                            <span id="view-all-text">View All</span>
+                            <span id="hidden-count" class="hidden-count">+<%= workers.length - INITIAL_SHOW %>
+                                    more</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <% } %>
+            </div>
+    </div>
+
+    <!-- Add Worker Modal -->
+    <div id="addWorkerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Field Worker</h2>
+                <span class="close-btn" onclick="closeModal('addWorkerModal')">&times;</span>
+            </div>
+            <form action="/admin/workers/add" method="POST">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" required class="form-control" placeholder="Enter Full Name">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" name="role" required class="form-control" placeholder="Enter Job Role">
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <select name="department" class="form-control"
+                        style="background-color: var(--bg-primary); color: var(--text-primary);">
+                        <option value="Public Works">Public Works</option>
+                        <option value="Sanitation">Sanitation</option>
+                        <option value="Water Board">Water Board</option>
+                        <option value="Electricity">Electricity</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" required class="form-control" placeholder="Enter Phone Number">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addWorkerModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Worker</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Task Modal (Simulation) -->
+    <div id="assignTaskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Assign Task</h2>
+                <span class="close-btn" onclick="closeModal('assignTaskModal')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Worker</label>
+                <input type="text" id="assign-worker-name" class="form-control" readonly>
+            </div>
+            <div class="form-group">
+                <label>Select Task</label>
+                <select class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);">
+                    <option>Fix Street Light at Main Sq...</option>
+                    <option>Clean Drainage at Sector 4...</option>
+                    <option>Repair Water Pipe at Market...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);">
+                    <option>High</option>
+                    <option>Medium</option>
+                    <option>Low</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('assignTaskModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAssignment()">Assign</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Add Worker Button Action
+        document.querySelector('.btn-primary').onclick = function () {
+            openModal('addWorkerModal');
+        }
+
+        // Call Action
+        function callWorker(name, phone) {
+            if (confirm(`Call ${name} at ${phone}?`)) {
+                window.location.href = `tel:${phone}`;
+            }
+        }
+
+        // Assign Task Action
+        function openAssignModal(name) {
+            document.getElementById('assign-worker-name').value = name;
+            openModal('assignTaskModal');
+        }
+
+        function confirmAssignment() {
+            alert('Task successfully assigned! Worker will be notified.');
+            closeModal('assignTaskModal');
+        }
+
+        // View All Toggle
+        function toggleViewAll() {
+            const hiddenCards = document.querySelectorAll('.worker-card.hidden-card');
+            const viewAllBtn = document.getElementById('view-all-btn');
+            const viewAllText = document.getElementById('view-all-text');
+            const hiddenCount = document.getElementById('hidden-count');
+            const isExpanded = viewAllBtn.classList.contains('expanded');
+
+            if (isExpanded) {
+                hiddenCards.forEach(card => {
+                    card.classList.remove('show');
+                });
+                viewAllBtn.classList.remove('expanded');
+                viewAllText.textContent = 'View All';
+                hiddenCount.style.display = 'inline';
+            } else {
+                hiddenCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('show');
+                    }, index * 100);
+                });
+                viewAllBtn.classList.add('expanded');
+                viewAllText.textContent = 'Show Less';
+                hiddenCount.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "project-for-civics",
+  "version": "1.0.0",
+  "description": "Full-stack civic issue reporting and resolution platform for citizens, municipal admins and field workers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "mysql",
+    "socket.io",
+    "civic-tech",
+    "full-stack"
+  ],
+  "author": "Aditya Patil",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "chart.js": "^4.5.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.1.6",
+    "multer": "^2.0.2",
+    "mysql2": "^3.16.3",
+    "socket.io": "^4.8.3"
+  }
+}
