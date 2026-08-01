@@ -4,6 +4,9 @@
   <p align="center">
     A full-stack web platform empowering citizens, municipal authorities, and field workers to collaboratively report, track, and resolve civic issues in real-time.
   </p>
+  <p align="center">
+    <a href="https://project-for-civics.onrender.com"><strong>🚀 View Live Deployment</strong></a>
+  </p>
 </p>
 
 ---
