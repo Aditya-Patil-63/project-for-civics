@@ -55,12 +55,15 @@ The **Civic Issue Reporting & Resolution System** is a crowdsourced platform des
 | **Worker Management** | Manage field workers and their assignments |
 | **Department Routing** | Smart suggestions for routing issues to relevant departments |
 
+### 🤖 AI-Powered Complaint Triage
+Google Gemini API auto-categorizes complaints from natural language descriptions and scores severity.
+
 ### 🔧 Field Workers
 | Feature | Description |
 |---------|-------------|
 | **Task Dashboard** | View all assigned tasks with priority and details |
 | **Navigation** | Get directions to the issue location via Google Maps |
-| **Proof of Work** | Upload before/after photos to mark issues as resolved |
+| **Proof of Work** | Upload before/after photos (hosted on Cloudinary) to mark issues as resolved |
 | **Offline Support** | Continue working even without an internet connection |
 
 ---
@@ -75,8 +78,8 @@ The **Civic Issue Reporting & Resolution System** is a crowdsourced platform des
 | **Secondary Database** | MySQL (Department data) |
 | **Real-time** | Socket.io |
 | **Maps & Location** | Google Maps API |
-| **Authentication** | Express Sessions + Bcrypt with role-based access middleware protecting all admin/worker routes |
-| **File Uploads** | Multer |
+| **Authentication** | Express Sessions persisted via connect-mongo (MongoDB-backed sessions, production-safe) + Bcrypt with role-based access middleware protecting all admin/worker routes |
+| **File Uploads** | Multer + Cloudinary (cloud-hosted persistent storage) |
 
 ---
 
@@ -187,6 +190,7 @@ project-for-civics/
 | `GET` | `/api/issues` | List all issues (JSON) |
 | `POST` | `/api/issues` | Create a new issue (multipart form) |
 | `GET` | `/api/issues/check-duplicate?lat=...&lng=...` | Check for duplicate issues nearby |
+| `GET` | `/api/issues/:id/history` | View issue audit trail and status changes |
 
 ### Admin
 | Method | Endpoint | Description |
