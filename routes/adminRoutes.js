@@ -188,10 +188,16 @@ router.post('/departments/edit/:id', async (req, res) => {
 router.get('/workers', async (req, res) => {
     try {
         const [rows] = await mysqlPool.execute('SELECT * FROM workers ORDER BY created_at DESC');
-        res.render('admin/workers', { workers: rows });
+        
+        // Fetch pending issues for assignment dropdown
+        const pendingIssues = await Issue.find({ status: { $in: ['Reported', 'Pending'] } })
+            .select('_id title category')
+            .lean();
+
+        res.render('admin/workers', { workers: rows, pendingIssues });
     } catch (err) {
-        console.error('MySQL Error in /workers:', err.message);
-        res.render('admin/workers', { workers: [] }); // Graceful fallback
+        console.error('Error in /workers:', err.message);
+        res.render('admin/workers', { workers: [], pendingIssues: [] }); // Graceful fallback
     }
 });
 

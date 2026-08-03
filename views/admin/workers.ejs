@@ -250,7 +250,7 @@
                                             onclick="callWorker('<%= worker.name %>', '<%= worker.phone %>')"><i
                                                 class="fas fa-phone"></i> Call</button>
                                         <button class="btn btn-sm btn-primary"
-                                            onclick="openAssignModal('<%= worker.name %>')">Assign Task</button>
+                                            onclick="openAssignModal('<%= worker.id %>', '<%= worker.name %>', '<%= worker.department %>')">Assign Task</button>
                                     </div>
                                 </div>
                                 <% }) %>
@@ -319,39 +319,35 @@
         </div>
     </div>
 
-    <!-- Assign Task Modal (Simulation) -->
+    <!-- Assign Task Modal -->
     <div id="assignTaskModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Assign Task</h2>
                 <span class="close-btn" onclick="closeModal('assignTaskModal')">&times;</span>
             </div>
-            <div class="form-group">
-                <label>Worker</label>
-                <input type="text" id="assign-worker-name" class="form-control" readonly>
-            </div>
-            <div class="form-group">
-                <label>Select Task</label>
-                <select class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);">
-                    <option>Fix Street Light at Main Sq...</option>
-                    <option>Clean Drainage at Sector 4...</option>
-                    <option>Repair Water Pipe at Market...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Priority</label>
-                <select class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);">
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" onclick="closeModal('assignTaskModal')">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="confirmAssignment()">Assign</button>
-            </div>
+            <form id="assignTaskForm" method="POST">
+                <input type="hidden" id="assign-worker-id" name="worker_id">
+                <div class="form-group">
+                    <label>Worker</label>
+                    <input type="text" id="assign-worker-name" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Select Task</label>
+                    <select id="assign-task-select" class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);" required>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('assignTaskModal')">Cancel</button>
+                    <button type="submit" id="assign-submit-btn" class="btn btn-primary">Assign</button>
+                </div>
+            </form>
         </div>
     </div>
+
+    <script>
+        const pendingIssues = <%- JSON.stringify(pendingIssues || []) %>;
+    </script>
 
     <script>
         // Modal Functions
@@ -383,15 +379,48 @@
         }
 
         // Assign Task Action
-        function openAssignModal(name) {
+        function openAssignModal(id, name, department) {
+            document.getElementById('assign-worker-id').value = id;
             document.getElementById('assign-worker-name').value = name;
+            
+            const deptToCategory = {
+                'Water Board': 'Water',
+                'Public Works': 'Road',
+                'Sanitation': 'Garbage',
+                'Electricity': 'Electricity'
+            };
+            const targetCategory = deptToCategory[department] || department;
+            
+            const selectTask = document.getElementById('assign-task-select');
+            selectTask.innerHTML = '';
+            
+            const filteredIssues = pendingIssues.filter(issue => issue.category === targetCategory);
+            
+            if (filteredIssues.length === 0) {
+                selectTask.innerHTML = '<option value="">No pending tasks for this department</option>';
+                document.getElementById('assign-submit-btn').disabled = true;
+            } else {
+                filteredIssues.forEach(issue => {
+                    const opt = document.createElement('option');
+                    opt.value = issue._id;
+                    opt.textContent = issue.title;
+                    selectTask.appendChild(opt);
+                });
+                document.getElementById('assign-submit-btn').disabled = false;
+            }
+            
             openModal('assignTaskModal');
         }
 
-        function confirmAssignment() {
-            alert('Task successfully assigned! Worker will be notified.');
-            closeModal('assignTaskModal');
-        }
+        document.getElementById('assignTaskForm').addEventListener('submit', function(e) {
+            const issueId = document.getElementById('assign-task-select').value;
+            if (!issueId) {
+                e.preventDefault();
+                alert('Please select a valid task.');
+                return;
+            }
+            this.action = `/admin/api/issues/${issueId}/assign`;
+        });
 
         // View All Toggle
         function toggleViewAll() {
