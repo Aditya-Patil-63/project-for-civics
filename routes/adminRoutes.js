@@ -190,7 +190,7 @@ router.get('/workers', async (req, res) => {
         const [rows] = await mysqlPool.execute('SELECT * FROM workers ORDER BY created_at DESC');
         
         // Fetch pending issues for assignment dropdown
-        const pendingIssues = await Issue.find({ status: { $in: ['Reported', 'Pending'] } })
+        const pendingIssues = await Issue.find({ status: { $in: ['Submitted', 'Under Review'] } })
             .select('_id title category')
             .lean();
 
