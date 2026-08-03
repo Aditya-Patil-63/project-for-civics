@@ -238,6 +238,59 @@ router.post('/workers/add', upload.single('photo'), async (req, res) => {
     res.redirect('/admin/workers');
 });
 
+// Delete Worker Route
+router.post('/workers/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // First get the worker's email from MySQL
+        const [rows] = await mysqlPool.execute('SELECT email FROM workers WHERE id = ?', [id]);
+        if (rows.length > 0) {
+            const workerEmail = rows[0].email;
+            
+            // Delete from MySQL
+            await mysqlPool.execute('DELETE FROM workers WHERE id = ?', [id]);
+            
+            // Delete from MongoDB
+            await User.deleteOne({ email: workerEmail });
+        }
+    } catch (err) {
+        console.error('Error deleting worker:', err.message);
+        return res.send(`<script>alert("Error deleting worker: ${err.message}"); window.location.href="/admin/workers";</script>`);
+    }
+    res.redirect('/admin/workers');
+});
+
+// Update Worker Profile Route
+router.post('/workers/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, email, password } = req.body;
+    try {
+        // Get the old email to find the MongoDB User
+        const [rows] = await mysqlPool.execute('SELECT email FROM workers WHERE id = ?', [id]);
+        if (rows.length === 0) return res.redirect('/admin/workers');
+        const oldEmail = rows[0].email;
+
+        // Update MySQL
+        await mysqlPool.execute('UPDATE workers SET name = ?, email = ? WHERE id = ?', [name, email, id]);
+
+        // Update MongoDB
+        const updateData = { name, email };
+        
+        // If a new password is provided, hash it and update
+        if (password && password.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            updateData.password_hash = await bcrypt.hash(password, salt);
+        }
+
+        await User.updateOne({ email: oldEmail }, { $set: updateData });
+
+    } catch (err) {
+        console.error('Error updating worker:', err.message);
+        return res.send(`<script>alert("Error updating worker: ${err.message}"); window.location.href="/admin/workers";</script>`);
+    }
+    res.redirect('/admin/workers');
+});
+
 // Redirect /admin to /admin/dashboard
 router.get('/', (req, res) => {
     res.redirect('/admin/dashboard');

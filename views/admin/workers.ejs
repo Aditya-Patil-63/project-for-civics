@@ -245,12 +245,17 @@
                                         </div>
                                     </div>
 
-                                    <div class="worker-actions">
+                                    <div class="worker-actions" style="display: flex; gap: 5px; flex-wrap: wrap;">
                                         <button class="btn btn-sm btn-outline"
-                                            onclick="callWorker('<%= worker.name %>', '<%= worker.phone %>')"><i
+                                            onclick="callWorker('<%= worker.name %>', '<%= worker.phone %>')" style="flex: 1;"><i
                                                 class="fas fa-phone"></i> Call</button>
                                         <button class="btn btn-sm btn-primary"
-                                            onclick="openAssignModal('<%= worker.id %>', '<%= worker.name %>', '<%= worker.department %>')">Assign Task</button>
+                                            onclick="openAssignModal('<%= worker.id %>', '<%= worker.name %>', '<%= worker.department %>')" style="flex: 1;">Assign</button>
+                                        <button class="btn btn-sm btn-outline"
+                                            onclick="openProfileModal('<%= worker.id %>', '<%= worker.name %>', '<%= worker.email %>')" style="flex: 1;"><i class="fas fa-user-edit"></i> Profile</button>
+                                        <form action="/admin/workers/delete/<%= worker.id %>" method="POST" style="flex: 1; display: flex;" onsubmit="return confirm('Are you sure you want to delete this worker?');">
+                                            <button type="submit" class="btn btn-sm" style="background-color: #ef4444; color: white; border: none; width: 100%; height: 100%;"><i class="fas fa-trash"></i> Delete</button>
+                                        </form>
                                     </div>
                                 </div>
                                 <% }) %>
@@ -340,6 +345,35 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('assignTaskModal')">Cancel</button>
                     <button type="submit" id="assign-submit-btn" class="btn btn-primary">Assign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Worker Profile</h2>
+                <span class="close-btn" onclick="closeModal('editProfileModal')">&times;</span>
+            </div>
+            <form id="editProfileForm" method="POST">
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 0.5rem; display: block; font-weight: 500;">Worker Name</label>
+                    <input type="text" id="edit-worker-name" name="name" class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);" required>
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 0.5rem; display: block; font-weight: 500;">Worker Email</label>
+                    <input type="email" id="edit-worker-email" name="email" class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);" required>
+                </div>
+                <div class="form-group">
+                    <label style="color: var(--text-primary); margin-bottom: 0.5rem; display: block; font-weight: 500;">Reset Password (Optional)</label>
+                    <input type="password" name="password" class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary);" placeholder="Leave blank to keep current password">
+                    <small style="color: #64748b; margin-top: 5px; display: block;">Typing a new password here will completely override the worker's current password.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editProfileModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -448,6 +482,13 @@
                 hiddenCount.style.display = 'none';
             }
         }
+        function openProfileModal(id, name, email) {
+            document.getElementById('edit-worker-name').value = name;
+            document.getElementById('edit-worker-email').value = email;
+            document.getElementById('editProfileForm').action = '/admin/workers/update/' + id;
+            openModal('editProfileModal');
+        }
+
     </script>
 </body>
 
