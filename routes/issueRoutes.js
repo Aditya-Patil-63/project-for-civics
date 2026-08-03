@@ -208,7 +208,7 @@ router.post('/api/issues/ai-suggest', isAuthenticated, async (req, res) => {
         }
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
 
         const prompt = `You are categorizing civic complaints in India. Given this complaint description, respond with ONLY valid JSON, no markdown: {"category": one of Road/Sanitation/Water/Electricity/Public Safety/Other, "severity": integer 1-5}. Complaint: ${description}`;
 
