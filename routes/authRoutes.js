@@ -53,14 +53,18 @@ router.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // Assign role based on email suffix rules
-        let assignedRole = 'citizen';
+        // Assign role based on strict email suffix rules
         const lowerEmail = email.toLowerCase();
+        let assignedRole = '';
         
         if (lowerEmail.endsWith('.ac@city.gov.in')) {
             assignedRole = 'admin';
         } else if (lowerEmail.endsWith('@city.gov.in')) {
             assignedRole = 'worker';
+        } else if (lowerEmail.endsWith('@gmail.com')) {
+            assignedRole = 'citizen';
+        } else {
+            return res.render('register', { title: 'Register', error: 'Email must end with .ac@city.gov.in, @city.gov.in, or @gmail.com' });
         }
 
         // Create User
