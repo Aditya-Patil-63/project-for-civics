@@ -91,7 +91,7 @@ router.get('/issues', async (req, res) => {
 
         let workers = [];
         try {
-            const [rows] = await mysqlPool.execute('SELECT id, name, department FROM workers WHERE status = "Active"');
+            const [rows] = await mysqlPool.execute('SELECT id, name, department FROM workers WHERE status = ?', ['Active']);
             workers = rows;
         } catch (dbErr) {
             console.error('MySQL Error fetching workers:', dbErr.message);
