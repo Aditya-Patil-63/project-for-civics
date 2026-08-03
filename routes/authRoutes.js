@@ -53,12 +53,22 @@ router.post('/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
+        // Assign role based on email suffix rules
+        let assignedRole = 'citizen';
+        const lowerEmail = email.toLowerCase();
+        
+        if (lowerEmail.endsWith('.ac@city.gov.in')) {
+            assignedRole = 'admin';
+        } else if (lowerEmail.endsWith('@city.gov.in')) {
+            assignedRole = 'worker';
+        }
+
         // Create User
         const newUser = new User({
             name,
             email,
             password_hash,
-            role: 'citizen', // Default role
+            role: assignedRole,
             points: 0
         });
 
