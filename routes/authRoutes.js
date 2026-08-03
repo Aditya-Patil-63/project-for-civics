@@ -60,11 +60,11 @@ router.post('/register', async (req, res) => {
         if (lowerEmail.endsWith('.ac@city.gov.in')) {
             assignedRole = 'admin';
         } else if (lowerEmail.endsWith('@city.gov.in')) {
-            assignedRole = 'worker';
+            return res.render('register', { title: 'Register', error: "You are a worker, you can't create the account. Admin can create the worker account." });
         } else if (lowerEmail.endsWith('@gmail.com')) {
             assignedRole = 'citizen';
         } else {
-            return res.render('register', { title: 'Register', error: 'Email must end with .ac@city.gov.in, @city.gov.in, or @gmail.com' });
+            return res.render('register', { title: 'Register', error: 'Email must end with .ac@city.gov.in or @gmail.com' });
         }
 
         // Create User

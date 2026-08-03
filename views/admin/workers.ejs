@@ -211,7 +211,11 @@
                                 <div class="worker-card <%= isHidden ? 'hidden-card' : '' %>">
                                     <div class="worker-info">
                                         <div class="avatar">
-                                            <%= worker.name.charAt(0) %>
+                                            <% if (worker.photo_url) { %>
+                                                <img src="<%= worker.photo_url %>" alt="<%= worker.name %>" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                                            <% } else { %>
+                                                <%= worker.name.charAt(0) %>
+                                            <% } %>
                                                 <span class="status-dot status-<%= worker.status.toLowerCase() %>"
                                                     title="<%= worker.status %>"></span>
                                         </div>
@@ -272,13 +276,21 @@
                 <h2>Add Field Worker</h2>
                 <span class="close-btn" onclick="closeModal('addWorkerModal')">&times;</span>
             </div>
-            <form action="/admin/workers/add" method="POST">
+            <form action="/admin/workers/add" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Full Name</label>
                     <input type="text" name="name" required class="form-control" placeholder="Enter Full Name">
                 </div>
                 <div class="form-group">
-                    <label>Role</label>
+                    <label>Email Address</label>
+                    <input type="email" name="email" required class="form-control" placeholder="Enter Worker Email">
+                </div>
+                <div class="form-group">
+                    <label>Default Password</label>
+                    <input type="password" name="password" required class="form-control" placeholder="Enter Default Password">
+                </div>
+                <div class="form-group">
+                    <label>Job Title / Role</label>
                     <input type="text" name="role" required class="form-control" placeholder="Enter Job Role">
                 </div>
                 <div class="form-group">
@@ -294,6 +306,10 @@
                 <div class="form-group">
                     <label>Phone Number</label>
                     <input type="tel" name="phone" required class="form-control" placeholder="Enter Phone Number">
+                </div>
+                <div class="form-group">
+                    <label>Profile Photo</label>
+                    <input type="file" name="photo" accept="image/*" class="form-control" style="background-color: var(--bg-primary); color: var(--text-primary); padding: 0.5rem;">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('addWorkerModal')">Cancel</button>

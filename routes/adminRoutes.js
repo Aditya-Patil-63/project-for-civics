@@ -1,8 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const Issue = require('../models/Issue');
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 const { isAuthenticated, hasRole } = require('../middleware/auth');
 const { mysqlPool } = require('../config/db');
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET 
+});
+
+const storage = new CloudinaryStorage({ 
+    cloudinary, 
+    params: { 
+        folder: 'civic-workers', 
+        allowed_formats: ['jpg','jpeg','png'] 
+    } 
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5000000 }
+});
 
 router.use(isAuthenticated, hasRole(['admin']));
 
@@ -172,15 +196,37 @@ router.get('/workers', async (req, res) => {
 });
 
 // Add Worker Route
-router.post('/workers/add', async (req, res) => {
-    const { name, role, department, phone } = req.body;
+router.post('/workers/add', upload.single('photo'), async (req, res) => {
+    const { name, email, password, role, department, phone } = req.body;
     try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.send(`<script>alert("User with this email already exists!"); window.location.href="/admin/workers";</script>`);
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        const newUser = new User({
+            name,
+            email,
+            password_hash,
+            role: 'worker'
+        });
+        await newUser.save();
+
+        let photoUrl = null;
+        if (req.file) {
+            photoUrl = req.file.path;
+        }
+
         await mysqlPool.execute(
-            'INSERT INTO workers (name, role, department, phone) VALUES (?, ?, ?, ?)',
-            [name, role, department, phone]
+            'INSERT INTO workers (name, role, department, email, photo_url, phone) VALUES (?, ?, ?, ?, ?, ?)',
+            [name, role, department, email, photoUrl, phone]
         );
     } catch (err) {
-        console.error('MySQL Error adding worker:', err.message);
+        console.error('Error adding worker:', err.message);
+        return res.send(`<script>alert("Error adding worker: ${err.message}"); window.location.href="/admin/workers";</script>`);
     }
     res.redirect('/admin/workers');
 });

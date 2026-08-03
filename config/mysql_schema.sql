@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS workers (
     name VARCHAR(255) NOT NULL,
     role VARCHAR(100),
     department VARCHAR(100),
+    email VARCHAR(255),
+    photo_url VARCHAR(255),
     status VARCHAR(50) DEFAULT 'Active',
     phone VARCHAR(30),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
