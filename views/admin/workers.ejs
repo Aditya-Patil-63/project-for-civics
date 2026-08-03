@@ -403,7 +403,7 @@
                 filteredIssues.forEach(issue => {
                     const opt = document.createElement('option');
                     opt.value = issue._id;
-                    opt.textContent = issue.title;
+                    opt.textContent = issue.description.length > 50 ? issue.description.substring(0, 50) + '...' : issue.description;
                     selectTask.appendChild(opt);
                 });
                 document.getElementById('assign-submit-btn').disabled = false;
