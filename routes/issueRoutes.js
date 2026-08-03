@@ -6,13 +6,23 @@ const Issue = require('../models/Issue');
 const User = require('../models/User');
 const { checkDuplicates } = require('../utils/duplicateCheck');
 const { isAuthenticated } = require('../middleware/auth');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// Multer Storage Engine
-const storage = multer.diskStorage({
-    destination: './public/uploads/',
-    filename: function (req, file, cb) {
-        cb(null, 'issue-' + Date.now() + path.extname(file.originalname));
-    }
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET 
+});
+
+const storage = new CloudinaryStorage({ 
+    cloudinary, 
+    params: { 
+        folder: 'civic-issues', 
+        allowed_formats: ['jpg','jpeg','png'] 
+    } 
 });
 
 const upload = multer({
@@ -103,7 +113,7 @@ router.post('/api/issues', isAuthenticated, (req, res) => {
                         type: 'Point',
                         coordinates: [lng, lat]
                     },
-                    photos: req.files ? req.files.map(file => '/uploads/' + file.filename) : [],
+                    photos: req.files ? req.files.map(file => file.path) : [],
                     status: 'Submitted'
                 });
 
@@ -186,6 +196,38 @@ router.get('/api/issues/:id/history', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Error fetching status history:', err.message);
         res.status(500).json({ error: 'Server Error' });
+    }
+});
+
+// AI Suggest Route
+router.post('/api/issues/ai-suggest', isAuthenticated, async (req, res) => {
+    try {
+        const { description } = req.body;
+        if (!description || description.trim().length < 10) {
+            return res.status(400).json({ error: 'Description too short' });
+        }
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `You are categorizing civic complaints in India. Given this complaint description, respond with ONLY valid JSON, no markdown: {"category": one of Road/Sanitation/Water/Electricity/Public Safety/Other, "severity": integer 1-5}. Complaint: ${description}`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text().trim();
+        
+        let jsonRes;
+        try {
+            jsonRes = JSON.parse(responseText);
+        } catch (e) {
+            // Fallback for markdown code blocks
+            const cleaned = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+            jsonRes = JSON.parse(cleaned);
+        }
+
+        res.json(jsonRes);
+    } catch (err) {
+        console.error('Gemini AI Error:', err);
+        res.status(500).json({ error: 'Failed to generate AI suggestion' });
     }
 });
 

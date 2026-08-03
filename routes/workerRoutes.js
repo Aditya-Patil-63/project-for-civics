@@ -8,12 +8,21 @@ const { isAuthenticated, hasRole } = require('../middleware/auth');
 router.use('/worker', isAuthenticated, hasRole(['worker']));
 router.use('/api/worker', isAuthenticated, hasRole(['worker']));
 
-// Multer Configuration
-const storage = multer.diskStorage({
-    destination: './public/uploads/',
-    filename: function (req, file, cb) {
-        cb(null, 'worker-' + Date.now() + path.extname(file.originalname));
-    }
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET 
+});
+
+const storage = new CloudinaryStorage({ 
+    cloudinary, 
+    params: { 
+        folder: 'civic-issues', 
+        allowed_formats: ['jpg','jpeg','png'] 
+    } 
 });
 
 const upload = multer({
@@ -242,7 +251,7 @@ router.post('/api/worker/tasks/:id/complete', (req, res) => {
 
             // If photo uploaded, append to existing photos
             if (req.file) {
-                updateData.$push = { photos: '/uploads/' + req.file.filename };
+                updateData.$push = { photos: req.file.path };
             }
 
             const oldStatus = task.status;
