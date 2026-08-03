@@ -43,11 +43,11 @@ router.get('/dashboard', async (req, res) => {
             console.error('MySQL Error counting workers:', dbErr.message);
         }
 
-        // Calculate Stats
+        // Calculate stats
         const stats = {
             total: issues.length,
-            resolved: issues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length,
-            pending: issues.filter(i => i.status !== 'Resolved' && i.status !== 'Closed').length,
+            resolved: issues.filter(i => i.status === 'Resolved').length,
+            pending: issues.filter(i => i.status === 'Submitted').length,
             workers: workerCount
         };
 
