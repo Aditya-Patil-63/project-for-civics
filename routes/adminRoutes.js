@@ -250,14 +250,20 @@ router.post('/workers/delete/:id', async (req, res) => {
             // Delete from MySQL
             await mysqlPool.execute('DELETE FROM workers WHERE id = ?', [id]);
             
-            // Delete from MongoDB
-            await User.deleteOne({ email: workerEmail });
+            // Delete from MongoDB using case-insensitive regex just in case
+            if (workerEmail) {
+                await User.deleteOne({ email: new RegExp('^' + workerEmail + '$', 'i') });
+            }
+            
+            // Send success alert
+            return res.send(`<script>alert("Worker deleted permanently from both databases."); window.location.href="/admin/workers";</script>`);
+        } else {
+            return res.send(`<script>alert("Worker not found in database."); window.location.href="/admin/workers";</script>`);
         }
     } catch (err) {
         console.error('Error deleting worker:', err.message);
         return res.send(`<script>alert("Error deleting worker: ${err.message}"); window.location.href="/admin/workers";</script>`);
     }
-    res.redirect('/admin/workers');
 });
 
 // Update Worker Profile Route
