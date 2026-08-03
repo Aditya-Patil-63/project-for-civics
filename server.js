@@ -31,7 +31,7 @@ if (!process.env.SESSION_SECRET) {
     console.warn('WARNING: SESSION_SECRET is not set. Using default secret. Set this in production!');
 }
 
-const MongoStore = require('connect-mongo');
+const { MongoStore } = require('connect-mongo');
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
