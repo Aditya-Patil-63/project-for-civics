@@ -107,7 +107,24 @@ router.get('/issues', async (req, res) => {
 router.get('/departments', async (req, res) => {
     try {
         const [rows] = await mysqlPool.execute('SELECT * FROM departments');
-        res.render('admin/departments', { departments: rows });
+        
+        // Dynamically calculate staff counts from workers table
+        const [workerCounts] = await mysqlPool.execute('SELECT department, COUNT(*) as count FROM workers GROUP BY department');
+        
+        const staffMap = {};
+        workerCounts.forEach(w => {
+            let key = w.department;
+            if (key === 'Public Works') key = 'Public Works Dept';
+            if (key === 'Electricity') key = 'Electricity Board';
+            staffMap[key] = w.count;
+        });
+
+        const departments = rows.map(dept => ({
+            ...dept,
+            staff: staffMap[dept.name] || 0
+        }));
+
+        res.render('admin/departments', { departments });
     } catch (err) {
         console.error('MySQL Error in /departments:', err.message);
         res.render('admin/departments', { departments: [] }); // Graceful fallback
