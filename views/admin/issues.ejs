@@ -405,9 +405,22 @@
                                                     <form action="/admin/api/issues/<%= issue._id %>/assign" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
                                                         <select name="worker_id" class="form-control" style="padding: 0.25rem; font-size: 0.85rem;" required>
                                                             <option value="">Select Worker...</option>
-                                                            <% workers.forEach(worker => { %>
+                                                            <% 
+                                                                const categoryToDept = {
+                                                                    'Water': 'Water Board',
+                                                                    'Road': 'Public Works',
+                                                                    'Sanitation': 'Sanitation',
+                                                                    'Electricity': 'Electricity'
+                                                                };
+                                                                const targetDept = categoryToDept[issue.category];
+                                                                workers.forEach(worker => { 
+                                                                    if (!targetDept || worker.department.includes(targetDept) || targetDept.includes(worker.department)) {
+                                                            %>
                                                                 <option value="<%= worker.id %>"><%= worker.name %> (<%= worker.department %>)</option>
-                                                            <% }) %>
+                                                            <% 
+                                                                    }
+                                                                }) 
+                                                            %>
                                                         </select>
                                                         <button type="submit" class="btn btn-sm btn-primary" style="padding: 0.25rem 0.5rem;">
                                                             Assign
