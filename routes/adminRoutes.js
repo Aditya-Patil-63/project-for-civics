@@ -11,11 +11,20 @@ router.get('/dashboard', async (req, res) => {
     try {
         const issues = await Issue.find();
 
+        let workerCount = 0;
+        try {
+            const [rows] = await mysqlPool.execute('SELECT COUNT(*) as count FROM workers');
+            workerCount = rows[0].count;
+        } catch (dbErr) {
+            console.error('MySQL Error counting workers:', dbErr.message);
+        }
+
         // Calculate Stats
         const stats = {
             total: issues.length,
             resolved: issues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length,
-            pending: issues.filter(i => i.status !== 'Resolved' && i.status !== 'Closed').length
+            pending: issues.filter(i => i.status !== 'Resolved' && i.status !== 'Closed').length,
+            workers: workerCount
         };
 
         // Aggregation for Charts
