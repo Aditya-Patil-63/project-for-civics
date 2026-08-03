@@ -77,6 +77,7 @@
                         <textarea name="description" id="description" rows="3" placeholder=" " required></textarea>
                         <label for="description">Describe the issue...</label>
                         <i class="fas fa-pen input-icon"></i>
+                        <button type="button" id="aiSuggestBtn" class="btn btn-primary" style="margin-top: 15px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="suggestCategoryAndSeverity()">✨ AI Suggest Category & Severity</button>
                     </div>
 
                     <div class="severity-control">
@@ -621,6 +622,52 @@
     </style>
 
     <script>
+        async function suggestCategoryAndSeverity() {
+            const description = document.getElementById('description').value;
+            if (description.trim().length < 10) {
+                alert('Please enter at least 10 characters to use AI suggestion.');
+                return;
+            }
+
+            const btn = document.getElementById('aiSuggestBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/issues/ai-suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.category) {
+                        const radios = document.querySelectorAll('input[name="category"]');
+                        for (let r of radios) {
+                            if (r.value === data.category || (data.category === 'Safety' && r.value === 'Public Safety')) {
+                                r.checked = true;
+                                selectCategory(r.closest('.category-card'));
+                                break;
+                            }
+                        }
+                    }
+
+                    if (data.severity) {
+                        document.getElementById('severity').value = data.severity;
+                        updateSeverity(data.severity);
+                    }
+                }
+            } catch (err) {
+                console.error('AI Suggestion failed', err);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
         let currentStep = 1;
         function nextStep(step) {
             if (step === 2 && !document.querySelector('input[name="category"]:checked')) return shakeForm();
